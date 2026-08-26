@@ -31,6 +31,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      // Do not force redirect for initial auth check
+      if (originalRequest.url === "/auth/me") {
+        return Promise.reject(error);
+      }
+
       if (originalRequest.url === "/auth/refresh") {
          sessionStorage.removeItem("access_token");
          localStorage.removeItem("access_token");
