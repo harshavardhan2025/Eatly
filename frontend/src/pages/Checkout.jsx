@@ -10,7 +10,7 @@ function Checkout() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState("Aditya University College");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [placedOrder, setPlacedOrder] = useState(null);

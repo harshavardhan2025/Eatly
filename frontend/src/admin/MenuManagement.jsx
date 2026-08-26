@@ -153,7 +153,20 @@ function MenuManagement() {
 
               <div>
                 <h3>{food.name}</h3>
-                <p>{food.category || "Biryani"}</p>
+                <p style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span>{food.category || "Biryani"}</span>
+                  <span style={{ color: "#cbd5e1" }}>|</span>
+                  <span style={{
+                    display: 'inline-block',
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    backgroundColor: food.is_veg !== false ? '#22c55e' : '#ef4444',
+                  }}></span>
+                  <span style={{ fontSize: "12px", color: food.is_veg !== false ? "#16a34a" : "#dc2626", fontWeight: "bold" }}>
+                    {food.is_veg !== false ? "Veg" : "Non-Veg"}
+                  </span>
+                </p>
                 <strong>₹{food.price}</strong>
               </div>
 
@@ -270,14 +283,28 @@ function MenuManagement() {
                 <label htmlFor="availCheck">Available [ ✓ ]</label>
               </div>
 
-              <div className="checkbox-row" style={{ marginTop: '10px' }}>
-                <input
-                  type="checkbox"
-                  id="vegCheck"
-                  checked={formData.is_veg}
-                  onChange={(e) => setFormData({ ...formData, is_veg: e.target.checked })}
-                />
-                <label htmlFor="vegCheck">Vegetarian [ 🌿 ]</label>
+              <label>Dietary Type</label>
+              <div className="radio-group" style={{ display: "flex", gap: "20px", marginBottom: "16px", marginTop: "8px" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontWeight: "600" }}>
+                  <input
+                    type="radio"
+                    name="dietType"
+                    checked={formData.is_veg === true}
+                    onChange={() => setFormData({ ...formData, is_veg: true })}
+                    style={{ cursor: "pointer", width: "18px", height: "18px", accentColor: "#16a34a" }}
+                  />
+                  Vegetarian 🌿
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontWeight: "600" }}>
+                  <input
+                    type="radio"
+                    name="dietType"
+                    checked={formData.is_veg === false}
+                    onChange={() => setFormData({ ...formData, is_veg: false })}
+                    style={{ cursor: "pointer", width: "18px", height: "18px", accentColor: "#dc2626" }}
+                  />
+                  Non-Vegetarian 🍗
+                </label>
               </div>
 
               <div className="modal-actions">

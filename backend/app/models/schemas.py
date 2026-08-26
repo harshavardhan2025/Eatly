@@ -88,6 +88,7 @@ class FoodItemCreate(BaseModel):
     category: Optional[str] = "Biryani"
     image_url: Optional[str] = ""
     is_available: bool = True
+    is_veg: Optional[bool] = False
 
 class FoodItemUpdate(BaseModel):
     name: Optional[str] = None
@@ -96,6 +97,7 @@ class FoodItemUpdate(BaseModel):
     category: Optional[str] = None
     image_url: Optional[str] = None
     is_available: Optional[bool] = None
+    is_veg: Optional[bool] = None
 
 class FoodItemOut(BaseModel):
     id: str
@@ -107,6 +109,7 @@ class FoodItemOut(BaseModel):
     image: Optional[str] = ""
     is_available: bool = True
     available: bool = True
+    is_veg: Optional[bool] = False
     liked_by: List[str] = []
 
 # --- Order Schemas ---

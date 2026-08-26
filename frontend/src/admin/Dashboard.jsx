@@ -54,6 +54,7 @@ function Dashboard() {
     category: "Biryani",
     image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800",
     available: true,
+    is_veg: true,
   });
 
   // Complaints State
@@ -146,6 +147,7 @@ function Dashboard() {
       category: "Biryani",
       image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800",
       available: true,
+      is_veg: true,
     });
     setShowMenuModal(true);
   };
@@ -161,6 +163,7 @@ function Dashboard() {
       category: food.category || "Biryani",
       image: food.image_url || food.image || "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800",
       available: food.is_available !== false,
+      is_veg: food.is_veg !== false,
     });
     setShowMenuModal(true);
   };
@@ -215,6 +218,7 @@ function Dashboard() {
         category: finalCategory,
         image_url: menuFormData.image,
         is_available: menuFormData.available,
+        is_veg: menuFormData.is_veg,
       };
 
       if (editingId) {
@@ -472,7 +476,20 @@ function Dashboard() {
                   <img src={food.image_url || food.image} alt={food.name} />
 
                   <div className="dish-details">
-                    <span className="dish-cat">{food.category || "Biryani"}</span>
+                    <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "8px" }}>
+                      <span className="dish-cat">{food.category || "Biryani"}</span>
+                      <span style={{ fontSize: "12px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "6px", color: food.is_veg !== false ? "#16a34a" : "#dc2626" }}>
+                        <div style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          width: '14px', height: '14px', border: `1.5px solid ${food.is_veg !== false ? '#16a34a' : '#dc2626'}`, borderRadius: '2px'
+                        }} title={food.is_veg !== false ? "Vegetarian" : "Non-Vegetarian"}>
+                          <div style={{
+                            width: '6px', height: '6px', borderRadius: '50%', backgroundColor: food.is_veg !== false ? '#16a34a' : '#dc2626'
+                          }}></div>
+                        </div>
+                        {food.is_veg !== false ? "Veg" : "Non-Veg"}
+                      </span>
+                    </div>
                     <h3>{food.name}</h3>
                     <p className="dish-desc">{food.description}</p>
                     <strong className="dish-price">₹{food.price}</strong>
@@ -769,6 +786,33 @@ function Dashboard() {
                   <img src={menuFormData.image} alt="Dish Preview" />
                 </div>
               )}
+
+              {/* Dietary Type Radio Buttons */}
+              <div className="form-group">
+                <label>Dietary Type</label>
+                <div style={{ display: "flex", gap: "20px", marginTop: "8px" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontWeight: "600" }}>
+                    <input
+                      type="radio"
+                      name="dietTypeDashboard"
+                      checked={menuFormData.is_veg === true}
+                      onChange={() => setMenuFormData({ ...menuFormData, is_veg: true })}
+                      style={{ cursor: "pointer", width: "18px", height: "18px", accentColor: "#16a34a" }}
+                    />
+                    Vegetarian 🌿
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontWeight: "600" }}>
+                    <input
+                      type="radio"
+                      name="dietTypeDashboard"
+                      checked={menuFormData.is_veg === false}
+                      onChange={() => setMenuFormData({ ...menuFormData, is_veg: false })}
+                      style={{ cursor: "pointer", width: "18px", height: "18px", accentColor: "#dc2626" }}
+                    />
+                    Non-Vegetarian 🍗
+                  </label>
+                </div>
+              </div>
 
               <div className="form-group checkbox-group">
                 <label htmlFor="availCheckModal" className="checkbox-label">

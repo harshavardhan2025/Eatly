@@ -23,6 +23,7 @@ def doc_to_food_item(doc: dict) -> FoodItemOut:
         image=str(img),
         is_available=bool(avail),
         available=bool(avail),
+        is_veg=doc.get("is_veg", False),
         liked_by=doc.get("liked_by", []),
     )
 
@@ -107,6 +108,7 @@ def create_food_item(item_in: FoodItemCreate, admin: dict = Depends(get_current_
         "image": img_val,
         "is_available": item_in.is_available,
         "available": item_in.is_available,
+        "is_veg": item_in.is_veg,
     }
     result = food_items_collection.insert_one(doc)
     doc["_id"] = result.inserted_id
@@ -135,6 +137,8 @@ def update_food_item(item_id: str, item_in: FoodItemUpdate, admin: dict = Depend
     if item_in.is_available is not None:
         update_data["is_available"] = item_in.is_available
         update_data["available"] = item_in.is_available
+    if item_in.is_veg is not None:
+        update_data["is_veg"] = item_in.is_veg
 
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields provided for update")
