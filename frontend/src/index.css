@@ -221,10 +221,8 @@ button {
   min-height: 400px;
   display: flex;
   align-items: center;
-  background: linear-gradient(
-      rgba(15, 23, 42, 0.84),
-      rgba(15, 23, 42, 0.88)
-    ),
+  background: linear-gradient(rgba(15, 23, 42, 0.84),
+      rgba(15, 23, 42, 0.88)),
     url("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600");
   background-size: cover;
   background-position: center;
@@ -363,7 +361,7 @@ button {
   filter: drop-shadow(0 4px 12px rgba(245, 158, 11, 0.3));
 }
 
-.hero-content > p:not(.hero-small) {
+.hero-content>p:not(.hero-small) {
   max-width: 600px;
   font-size: 18px;
   line-height: 1.7;
@@ -794,7 +792,7 @@ button {
   font-size: 40px;
   display: inline-block;
   margin-bottom: 14px;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
 }
 
 .feature-card h3 {
@@ -1098,9 +1096,17 @@ button {
   color: #d97706;
 }
 
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.font-bold { font-weight: 700; }
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.font-bold {
+  font-weight: 700;
+}
 
 .official-stepper-box {
   margin-bottom: 28px;
@@ -1222,7 +1228,7 @@ button {
   margin: 25px 0;
 }
 
-.checkout-summary > div {
+.checkout-summary>div {
   display: flex;
   justify-content: space-between;
   padding: 10px 0;
@@ -1268,7 +1274,7 @@ button {
 
 /* ORDER DETAILS */
 
-.order-products > div {
+.order-products>div {
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
@@ -1290,7 +1296,7 @@ button {
   color: #222;
 }
 
-.tracking-item > span {
+.tracking-item>span {
   font-size: 20px;
 }
 
@@ -1347,7 +1353,7 @@ button {
   margin: 20px 0;
 }
 
-.customer-info > * {
+.customer-info>* {
   display: block;
   margin: 6px 0;
 }
@@ -1592,12 +1598,13 @@ button {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.85); /* 85% white shade for much clearer background */
+  background: rgba(255, 255, 255, 0.85);
+  /* 85% white shade for much clearer background */
   pointer-events: none;
   z-index: 0;
 }
 
-.food-loader-container > * {
+.food-loader-container>* {
   position: relative;
   z-index: 1;
 }
@@ -1649,6 +1656,7 @@ button {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -1659,10 +1667,12 @@ button {
     transform: scale(0.4) rotate(-15deg);
     opacity: 0.5;
   }
+
   60% {
     transform: scale(1.2) rotate(10deg);
     opacity: 1;
   }
+
   100% {
     transform: scale(1) rotate(0deg);
     opacity: 1;
@@ -1704,10 +1714,14 @@ button {
 }
 
 @keyframes dotPulse {
-  0%, 80%, 100% {
+
+  0%,
+  80%,
+  100% {
     transform: scale(0.6);
     opacity: 0.4;
   }
+
   40% {
     transform: scale(1.2);
     opacity: 1;
@@ -1941,7 +1955,8 @@ button {
 
 @media (max-width: 768px) {
   body {
-    padding-bottom: 75px; /* Room for fixed bottom navbar */
+    padding-bottom: 75px;
+    /* Room for fixed bottom navbar */
   }
 
   .mobile-hamburger {
@@ -2052,7 +2067,7 @@ button {
     font-size: 34px;
   }
 
-  .hero-content > p:not(.hero-small) {
+  .hero-content>p:not(.hero-small) {
     font-size: 15px;
     margin-bottom: 24px;
   }
@@ -2151,8 +2166,8 @@ button {
   z-index: 0;
 }
 
-.menu-page > *,
-.cart-page > * {
+.menu-page>*,
+.cart-page>* {
   position: relative;
   z-index: 1;
 }
@@ -2176,6 +2191,7 @@ button {
 
 /* Mobile responsive full-screen background tuning */
 @media (max-width: 768px) {
+
   .menu-page,
   .cart-page {
     padding-left: 16px;
@@ -2239,7 +2255,7 @@ button {
   pointer-events: none;
 }
 
-.auth-page > * {
+.auth-page>* {
   position: relative;
   z-index: 1;
 }
@@ -2249,7 +2265,7 @@ button {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.3) inset;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
   border-radius: 24px;
   width: 100%;
   max-width: 480px;
@@ -2259,13 +2275,16 @@ button {
 
 /* ULTRA-COMPACT MOBILE SIZING FOR ALL PAGES (< 768px) */
 @media (max-width: 768px) {
+
   /* Navbar & Logo */
   .navbar-container {
     padding: 8px 14px !important;
   }
+
   .logo {
     font-size: 16px !important;
   }
+
   .logo-icon {
     font-size: 18px !important;
   }
@@ -2275,16 +2294,19 @@ button {
   .page {
     padding: 16px 12px !important;
   }
+
   .section-heading h2,
   .page-heading h1 {
     font-size: 18px !important;
     margin: 4px 0 !important;
   }
+
   .section-heading p,
   .page-heading p {
     font-size: 10px !important;
     letter-spacing: 1px !important;
   }
+
   .page-heading {
     margin-bottom: 16px !important;
     padding: 10px 14px !important;
@@ -2300,6 +2322,7 @@ button {
     justify-content: center !important;
     overflow: hidden !important;
   }
+
   .auth-card.official-card {
     padding: 24px 20px !important;
     border-radius: 18px !important;
@@ -2308,40 +2331,49 @@ button {
     margin: 0 auto !important;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3) !important;
   }
+
   .auth-brand-badge {
     font-size: 10px !important;
     padding: 2px 8px !important;
   }
+
   .auth-header {
     margin-bottom: 14px !important;
   }
+
   .auth-header h1 {
     font-size: 18px !important;
     margin: 4px 0 !important;
   }
+
   .auth-header p {
     font-size: 11px !important;
   }
+
   .official-form .form-group {
     margin-bottom: 12px !important;
   }
+
   .official-form label {
     font-size: 12px !important;
     font-weight: 700 !important;
     margin-bottom: 4px !important;
   }
+
   .official-form input {
     padding: 10px 12px !important;
     font-size: 14px !important;
     height: 42px !important;
     border-radius: 8px !important;
   }
+
   .auth-btn {
     padding: 12px !important;
     font-size: 14px !important;
     margin-top: 6px !important;
     border-radius: 8px !important;
   }
+
   .auth-footer {
     margin-top: 14px !important;
     font-size: 11px !important;
@@ -2352,38 +2384,48 @@ button {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
   }
+
   .food-card {
     border-radius: 14px !important;
   }
+
   .food-image-wrapper {
     height: 230px !important;
   }
+
   .food-card-content {
     padding: 10px 12px !important;
   }
+
   .food-category {
     font-size: 10px !important;
     padding: 2px 6px !important;
   }
+
   .status-pill {
     font-size: 10px !important;
     padding: 2px 6px !important;
   }
+
   .food-card h3 {
     font-size: 15px !important;
     margin: 4px 0 !important;
   }
+
   .food-card p {
     font-size: 11px !important;
     line-height: 1.35 !important;
     margin-bottom: 8px !important;
   }
+
   .food-bottom {
     gap: 8px !important;
   }
+
   .food-price {
     font-size: 15px !important;
   }
+
   .add-btn {
     padding: 6px 12px !important;
     font-size: 11px !important;
@@ -2394,21 +2436,26 @@ button {
   .hero {
     min-height: 260px !important;
   }
+
   .hero-grid-container {
     padding: 20px 12px !important;
     gap: 14px !important;
   }
+
   .hero h1 {
     font-size: 20px !important;
   }
+
   .hero-badge {
     font-size: 10px !important;
     padding: 3px 8px !important;
   }
+
   .hero-showcase-card {
     padding: 10px !important;
     border-radius: 12px !important;
   }
+
   .hero-showcase-card img {
     height: 110px !important;
   }
@@ -2453,16 +2500,20 @@ button {
     padding: 14px 12px !important;
     border-radius: 12px !important;
   }
+
   .cart-item-row {
     padding: 8px 10px !important;
     gap: 8px !important;
   }
+
   .cart-item-info h3 {
     font-size: 12px !important;
   }
+
   .cart-unit-price {
     font-size: 10px !important;
   }
+
   .qty-btn {
     width: 24px !important;
     height: 24px !important;
@@ -2805,25 +2856,29 @@ button {
   font-size: 32px;
 }
 
-  /* Food Loader Container on Mobile */
-  .food-loader-container {
-    height: 100vh !important;
-  }
-  .food-loader-box {
-    width: 60px !important;
-    height: 60px !important;
-    margin-bottom: 12px !important;
-  }
-  .food-loader-icon-wrapper {
-    width: 44px !important;
-    height: 44px !important;
-  }
-  .food-loader-icon {
-    font-size: 22px !important;
-  }
-  .food-loader-text {
-    font-size: 12px !important;
-  }
+/* Food Loader Container on Mobile */
+.food-loader-container {
+  height: 100vh !important;
+}
+
+.food-loader-box {
+  width: 60px !important;
+  height: 60px !important;
+  margin-bottom: 12px !important;
+}
+
+.food-loader-icon-wrapper {
+  width: 44px !important;
+  height: 44px !important;
+}
+
+.food-loader-icon {
+  font-size: 22px !important;
+}
+
+.food-loader-text {
+  font-size: 12px !important;
+}
 
 .admin-bottom-logout {
   background: transparent;
@@ -3021,23 +3076,57 @@ button {
   color: #94a3b8;
   text-align: center;
 }
-/ *  
- M o b i l e  
- S c a l i n g  
- f o r  
- A d m i n  
- P a n e l  
- * /  
- 
+
 /* Mobile Scaling for Admin Panel */
 @media (max-width: 768px) {
-  .admin-page { padding: 10px; padding-top: 65px; }
-  .admin-tab { padding: 8px 10px; font-size: 11px; margin-right: 4px; }
-  .admin-section-title { font-size: 18px; margin-bottom: 12px; }
-  .admin-order-card, .admin-dish-card { padding: 12px; border-radius: 8px; }
-  .admin-action-buttons button, .btn-resolve { padding: 6px 10px; font-size: 10px; }
-  .admin-dish-card img { height: 100px; border-radius: 6px; }
-  .admin-order-top { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .admin-sub-text, .complaint-text { font-size: 11px; }
-  .admin-tabs-bar { padding-bottom: 8px; margin-bottom: 15px; overflow-x: auto; white-space: nowrap; }
+  .admin-page {
+    padding: 10px;
+    padding-top: 65px;
+  }
+
+  .admin-tab {
+    padding: 8px 10px;
+    font-size: 11px;
+    margin-right: 4px;
+  }
+
+  .admin-section-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .admin-order-card,
+  .admin-dish-card {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .admin-action-buttons button,
+  .btn-resolve {
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+
+  .admin-dish-card img {
+    height: 100px;
+    border-radius: 6px;
+  }
+
+  .admin-order-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .admin-sub-text,
+  .complaint-text {
+    font-size: 11px;
+  }
+
+  .admin-tabs-bar {
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }
