@@ -5,7 +5,6 @@ const Footer = () => {
   return (
     <footer className="footer-container">
       <div className="footer-content">
-        <p className="footer-brand">Heritage Restaurant by Eatly</p>
         <p className="footer-copyright">
           © {new Date().getFullYear()} All copyrights reserved. Made with <span className="heart">❤️</span> by Eatly
         </p>

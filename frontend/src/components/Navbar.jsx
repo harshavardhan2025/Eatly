@@ -41,7 +41,10 @@ function Navbar() {
         <div className="navbar-container">
           <Link to={isAdminMode ? "/admin" : "/"} className="logo" onClick={() => setMobileOpen(false)}>
             <UtensilsCrossed className="logo-icon" size={24} color="#f59e0b" />
-            <span className="logo-text">Heritage <span className="logo-accent">{isAdminMode ? "Admin" : "Restaurant"}</span></span>
+            <span className="logo-text">
+              Heritage <span className="logo-accent">{isAdminMode ? "Admin" : "Restaurant"}</span>
+              <span style={{ fontSize: "12px", color: "#94a3b8", marginLeft: "6px", fontWeight: "500", textTransform: "none" }}>by Eatly</span>
+            </span>
           </Link>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
