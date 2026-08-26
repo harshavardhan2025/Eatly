@@ -1580,38 +1580,23 @@ button {
   width: 100%;
   min-height: 100vh;
   text-align: center;
+  background-image: url("/food-pattern-bg.jpg");
+  background-repeat: repeat;
+  background-size: 550px auto;
+  background-position: top left;
+  background-attachment: fixed;
   position: relative;
   border-radius: 0;
   box-shadow: none;
 }
 
-/* Background Pattern spanning the whole screen */
 .food-loader-container::before {
   content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
-  background-image: url("/food-pattern-bg.jpg");
-  background-repeat: repeat;
-  background-size: 550px auto;
-  background-position: top left;
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* 85% white overlay over the pattern */
-.food-loader-container::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.85); /* 85% white shade for much clearer background */
   pointer-events: none;
   z-index: 0;
-}
-
-/* Bring the loader animation to the front */
-.food-loader-container > * {
-  position: relative;
-  z-index: 1;
 }
 
 .food-loader-container > * {
