@@ -1,5 +1,5 @@
-from app.database import users_collection, food_items_collection
-from app.core.security import get_password_hash
+from backend.app.database import users_collection, food_items_collection
+from backend.app.core.security import get_password_hash
 
 def seed():
     # Admin User
