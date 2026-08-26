@@ -1,6 +1,5 @@
-import sys
-from app.database import users_collection
-from app.core.security import create_access_token, decode_token, get_password_hash, verify_password
+from backend.app.database import users_collection
+from backend.app.core.security import create_access_token, decode_token, get_password_hash, verify_password
 from bson import ObjectId
 
 def test_admin():
