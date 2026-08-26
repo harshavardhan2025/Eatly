@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: eatly-backend
+    env: python
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && ./start.sh
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_NAME
+        value: food_ordering
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: ALLOWED_ORIGINS
+        value: "https://your-vercel-frontend-url.vercel.app" # UPDATE THIS IN RENDER DASHBOARD
+      - key: MONGODB_URL
+        value: "mongodb+srv://..." # UPDATE THIS IN RENDER DASHBOARD
+      - key: SECRET_KEY
+        generateValue: true
