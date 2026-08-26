@@ -1,1 +1,1 @@
-# Package routes
+# Make routes a module
