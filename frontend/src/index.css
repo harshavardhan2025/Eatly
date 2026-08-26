@@ -3080,52 +3080,64 @@ button {
 /* Mobile Scaling for Admin Panel */
 @media (max-width: 768px) {
   .admin-page {
-    padding: 10px;
-    padding-top: 65px;
+    padding: 8px;
+    padding-top: 60px;
   }
 
   .admin-tab {
-    padding: 8px 10px;
-    font-size: 11px;
+    padding: 6px 8px;
+    font-size: 10px;
     margin-right: 4px;
+    border-radius: 6px;
   }
 
   .admin-section-title {
-    font-size: 18px;
-    margin-bottom: 12px;
+    font-size: 16px;
+    margin-bottom: 10px;
   }
 
   .admin-order-card,
-  .admin-dish-card {
-    padding: 12px;
-    border-radius: 8px;
+  .admin-dish-card,
+  .complaint-card {
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
   }
 
   .admin-action-buttons button,
-  .btn-resolve {
-    padding: 6px 10px;
+  .btn-resolve,
+  .btn-add-food,
+  .admin-logout-btn {
+    padding: 6px 8px;
     font-size: 10px;
+    border-radius: 4px;
   }
 
   .admin-dish-card img {
-    height: 100px;
-    border-radius: 6px;
+    height: 80px;
+    border-radius: 4px;
+    margin-bottom: 8px;
   }
 
   .admin-order-top {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 6px;
   }
 
   .admin-sub-text,
-  .complaint-text {
-    font-size: 11px;
+  .complaint-text,
+  .dish-desc {
+    font-size: 10px;
+  }
+  
+  .dish-price, .admin-section-header h2 {
+    font-size: 14px;
   }
 
   .admin-tabs-bar {
-    padding-bottom: 8px;
-    margin-bottom: 15px;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
     overflow-x: auto;
     white-space: nowrap;
   }
