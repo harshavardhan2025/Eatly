@@ -17,7 +17,6 @@ import OrderDetails from "./pages/OrderDetails";
 import AdminLogin from "./admin/AdminLogin";
 import Dashboard from "./admin/Dashboard";
 import MenuManagement from "./admin/MenuManagement";
-import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -45,8 +44,6 @@ function App() {
                 <Route path="/admin/menu" element={<MenuManagement />} />
               </Routes>
             </div>
-            
-            <Footer />
           </CartProvider>
         </AuthProvider>
       </div>
