@@ -1576,18 +1576,17 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 20px;
+  padding: 0;
   width: 100%;
-  min-height: calc(100vh - 80px);
+  height: 100vh;
   text-align: center;
   background-image: url("/food-pattern-bg.jpg");
-  background-repeat: repeat;
-  background-size: 550px auto;
-  background-position: top left;
-  background-attachment: fixed;
-  position: relative;
-  border-radius: 0;
-  box-shadow: none;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
 }
 
 .food-loader-container::before {
@@ -2807,11 +2806,7 @@ button {
   font-size: 32px;
 }
 
-  /* Food Loader Container on Mobile */
-  .food-loader-container {
-    min-height: calc(100vh - 120px) !important;
-    padding: 30px 12px !important;
-  }
+  /* Food Loader Container on Mobile (Overrides removed for full screen) */
   .food-loader-box {
     width: 60px !important;
     height: 60px !important;
