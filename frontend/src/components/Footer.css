@@ -43,14 +43,6 @@
 
 @media (max-width: 768px) {
   .footer-container {
-    padding: 20px 12px;
-  }
-  
-  .footer-brand {
-    font-size: 14px;
-  }
-  
-  .footer-copyright {
-    font-size: 12px;
+    display: none;
   }
 }
