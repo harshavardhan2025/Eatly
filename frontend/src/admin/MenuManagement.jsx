@@ -14,6 +14,7 @@ function MenuManagement() {
     category: "Biryani",
     image: "/images/biryani.jpg",
     available: true,
+    is_veg: true,
   });
 
   const availableImages = [
@@ -47,6 +48,7 @@ function MenuManagement() {
       category: "Biryani",
       image: "/images/biryani.jpg",
       available: true,
+      is_veg: true,
     });
     setShowModal(true);
   };
@@ -60,6 +62,7 @@ function MenuManagement() {
       category: food.category || "Biryani",
       image: food.image_url || food.image || "/images/biryani.jpg",
       available: food.is_available !== false,
+      is_veg: food.is_veg !== false,
     });
     setShowModal(true);
   };
@@ -110,6 +113,7 @@ function MenuManagement() {
         category: formData.category,
         image_url: formData.image,
         is_available: formData.available,
+        is_veg: formData.is_veg,
       };
 
       if (editingId) {
@@ -264,6 +268,16 @@ function MenuManagement() {
                   onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
                 />
                 <label htmlFor="availCheck">Available [ ✓ ]</label>
+              </div>
+
+              <div className="checkbox-row" style={{ marginTop: '10px' }}>
+                <input
+                  type="checkbox"
+                  id="vegCheck"
+                  checked={formData.is_veg}
+                  onChange={(e) => setFormData({ ...formData, is_veg: e.target.checked })}
+                />
+                <label htmlFor="vegCheck">Vegetarian [ 🌿 ]</label>
               </div>
 
               <div className="modal-actions">

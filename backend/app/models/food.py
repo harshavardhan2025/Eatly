@@ -9,6 +9,7 @@ class FoodCreate(BaseModel):
     category: str
     image_url: Optional[str] = ""
     is_available: bool = True
+    is_veg: bool = True
 
 
 class FoodResponse(FoodCreate):

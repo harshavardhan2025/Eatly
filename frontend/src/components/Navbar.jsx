@@ -26,6 +26,13 @@ function Navbar() {
   const { cartCount } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const [mobileSearch, setMobileSearch] = useState("");
+
+  const handleMobileSearch = (e) => {
+    setMobileSearch(e.target.value);
+    window.dispatchEvent(new CustomEvent("mobile-menu-search", { detail: e.target.value }));
+  };
+
   const handleLogout = () => {
     logout();
     setMobileOpen(false);
@@ -42,10 +49,21 @@ function Navbar() {
           <Link to={isAdminMode ? "/admin" : "/"} className="logo" onClick={() => setMobileOpen(false)}>
             <UtensilsCrossed className="logo-icon" size={24} color="#f59e0b" />
             <span className="logo-text">
-              Heritage <span className="logo-accent">{isAdminMode ? "Admin" : "Restaurant"}</span>
-              <span style={{ fontSize: "12px", color: "#94a3b8", marginLeft: "6px", fontWeight: "500", textTransform: "none" }}>by Eatly</span>
+              Eatly
             </span>
           </Link>
+
+          {location.pathname === "/menu" && (
+            <div className="mobile-header-search">
+              <input
+                type="text"
+                placeholder="Search menu..."
+                value={mobileSearch}
+                onChange={handleMobileSearch}
+                style={{ width: '100%', maxWidth: '200px', padding: '6px 14px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: 'white', outline: 'none' }}
+              />
+            </div>
+          )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             {/* Nav Links (Desktop + Mobile Dropdown) */}

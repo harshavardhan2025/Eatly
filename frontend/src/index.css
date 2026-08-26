@@ -214,6 +214,23 @@ button {
   transform: translateY(-1px);
 }
 
+.mobile-header-search {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-header-search {
+    display: block;
+    flex: 1;
+    margin: 0 10px;
+  }
+  .desktop-search-input {
+    display: none !important;
+  }
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
 
 /* HERO - Royal Spice Theme */
 

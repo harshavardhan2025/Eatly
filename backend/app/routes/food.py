@@ -37,6 +37,9 @@ def get_food_items():
                 "is_available": food.get(
                     "is_available", True
                 ),
+                "is_veg": food.get(
+                    "is_veg", True
+                ),
             }
         )
 

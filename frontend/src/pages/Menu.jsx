@@ -7,6 +7,8 @@ function Menu() {
 
   const [foods, setFoods] = useState([]);
   const [category, setCategory] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dietaryPreference, setDietaryPreference] = useState("All");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,17 +33,41 @@ function Menu() {
 
   }, []);
 
+  useEffect(() => {
+    const handleMobileSearch = (e) => {
+      setSearchTerm(e.detail);
+    };
+    window.addEventListener("mobile-menu-search", handleMobileSearch);
+    return () => window.removeEventListener("mobile-menu-search", handleMobileSearch);
+  }, []);
+
   const categories = [
     "All",
     ...new Set(foods.map((food) => food.category).filter(Boolean)),
   ];
 
   // First preference: Available items shown first, remaining unavailable items shown after
-  const filteredFoods = (
-    category === "All"
-      ? foods
-      : foods.filter((food) => food.category === category)
-  ).slice().sort((a, b) => {
+  // Filter by category
+  let filteredFoods = category === "All"
+    ? foods
+    : foods.filter((food) => food.category === category);
+
+  // Filter by search term
+  if (searchTerm) {
+    filteredFoods = filteredFoods.filter((food) =>
+      food.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
+  // Filter by dietary preference
+  if (dietaryPreference === "Veg") {
+    filteredFoods = filteredFoods.filter((food) => food.is_veg !== false);
+  } else if (dietaryPreference === "Non-Veg") {
+    filteredFoods = filteredFoods.filter((food) => food.is_veg === false);
+  }
+
+  // First preference: Available items shown first, remaining unavailable items shown after
+  filteredFoods = filteredFoods.slice().sort((a, b) => {
     const availA = (a.is_available !== false && a.available !== false) ? 1 : 0;
     const availB = (b.is_available !== false && b.available !== false) ? 1 : 0;
     return availB - availA;
@@ -71,6 +97,29 @@ function Menu() {
         <h1>
           Choose Your Favorite Food
         </h1>
+      </div>
+
+      <div className="filters-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'center', marginBottom: '20px' }}>
+        <input
+          type="text"
+          placeholder="Search menu items..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input desktop-search-input"
+          style={{ padding: '10px 15px', borderRadius: '25px', border: '1px solid #ddd', minWidth: '250px', outline: 'none' }}
+        />
+        
+        <div className="dietary-filters" style={{ display: 'flex', gap: '10px' }}>
+          {["All", "Veg", "Non-Veg"].map((type) => (
+            <button
+              key={type}
+              className={`category ${dietaryPreference === type ? "active" : ""}`}
+              onClick={() => setDietaryPreference(type)}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="categories">

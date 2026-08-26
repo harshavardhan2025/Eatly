@@ -96,6 +96,14 @@ function FoodCard({ food }) {
         <div className="food-card-header">
           <span className="food-category">{food.category}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{
+              display: 'inline-block',
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              backgroundColor: food.is_veg !== false ? '#22c55e' : '#ef4444',
+              border: `2px solid ${food.is_veg !== false ? '#16a34a' : '#dc2626'}`
+            }} title={food.is_veg !== false ? "Vegetarian" : "Non-Vegetarian"}></span>
             {likesCount >= 1 && (
               <span style={{ fontSize: '13px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}>
                 <Heart size={14} fill="#ef4444" color="#ef4444" /> {likesCount}
