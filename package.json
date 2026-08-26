@@ -1,0 +1,8 @@
+{
+  "name": "eatly-monorepo",
+  "version": "1.0.0",
+  "description": "Eatly Monorepo Root",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build"
+  }
+}
