@@ -1,11 +1,5 @@
-import sys
-import os
-
-# Ensure backend directory is in Python path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from app.database import users_collection, food_items_collection
-from app.core.security import get_password_hash
+from backend.app.database import users_collection, food_items_collection
+from backend.app.core.security import get_password_hash
 
 def add_dummy_data():
     print("[INFO] Adding dummy data to MongoDB...")
