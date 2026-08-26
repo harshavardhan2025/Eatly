@@ -10,8 +10,9 @@ client = None
 # 1. Try local MongoDB first for maximum speed and zero network latency
 if os.getenv("FORCE_ATLAS") != "true":
     try:
-        client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=1500)
-        client.admin.command('ping')
+        temp_client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=1500)
+        temp_client.admin.command('ping')
+        client = temp_client
         print("[DATABASE] Connected to local MongoDB instance.")
     except Exception:
         pass
@@ -32,7 +33,6 @@ if client is None:
             client = MongoClient("mongodb://localhost:27017")
         else:
             raise Exception(f"Failed to connect to Atlas when FORCE_ATLAS was set. Error: {err}")
-
 
 db = client[settings.DATABASE_NAME]
 
