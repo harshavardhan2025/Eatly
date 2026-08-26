@@ -1310,14 +1310,14 @@ button {
 .admin-page {
   width: 100%;
   margin: auto;
-  padding: 50px 24px;
+  padding: 20px 24px;
 }
 
 .admin-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 35px;
+  margin-bottom: 20px;
 }
 
 .admin-header button {
