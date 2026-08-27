@@ -262,5 +262,10 @@ api.deleteAdminComplaint = async (id) => {
   return res.data;
 };
 
+api.getAdminDashboardSync = async () => {
+  const res = await api.get('/admin/dashboard-sync');
+  return res.data;
+};
+
 export { api };
 export default api;

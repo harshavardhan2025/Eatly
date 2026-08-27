@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import FoodCard from "../components/FoodCard";
 import FoodLoader from "../components/FoodLoader";
 import api from "../services/api";
+import "../admin/AdminPremium.css";
 
 function Menu() {
 
@@ -75,8 +76,23 @@ function Menu() {
 
   if (loading) {
     return (
-      <main className="page">
-        <FoodLoader text="Preparing our royal food menu..." />
+      <main className="page menu-page">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
+          <FoodLoader text="Preparing our royal food menu..." />
+        </div>
+        <div className="food-grid">
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <div key={n} className="skeleton-card" style={{ height: '400px' }}>
+              <div className="skeleton-img"></div>
+              <div style={{ padding: '20px' }}>
+                <div className="skeleton-header"></div>
+                <div className="skeleton-line" style={{ width: '100%' }}></div>
+                <div className="skeleton-line" style={{ width: '80%' }}></div>
+                <div className="skeleton-line" style={{ width: '40%' }}></div>
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
     );
   }

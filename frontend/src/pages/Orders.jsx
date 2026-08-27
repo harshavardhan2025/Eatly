@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import FoodLoader from "../components/FoodLoader";
+import "../admin/AdminPremium.css";
 
 function Orders() {
   const { user } = useAuth();
@@ -63,7 +64,21 @@ function Orders() {
       </div>
 
       {loading ? (
-        <FoodLoader text="⏳ 📦 Fetching your orders..." />
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
+            <FoodLoader text="⏳ 📦 Fetching your orders..." />
+          </div>
+          <div className="orders-list-grid">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="skeleton-card" style={{ height: '220px', marginBottom: '20px' }}>
+                <div className="skeleton-header"></div>
+                <div className="skeleton-line" style={{ width: '60%' }}></div>
+                <div className="skeleton-line" style={{ width: '80%' }}></div>
+                <div className="skeleton-line" style={{ width: '40%' }}></div>
+              </div>
+            ))}
+          </div>
+        </>
       ) : orders.length === 0 ? (
         <div className="cart-empty-card official-card text-center">
           <div className="empty-icon">📦</div>
