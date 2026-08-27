@@ -199,6 +199,19 @@ api.getAdminOrders = async () => {
   return res.data;
 };
 
+api.getAdminStatistics = async (startDate, endDate) => {
+  let url = "/admin/statistics";
+  const params = new URLSearchParams();
+  if (startDate) params.append("start_date", startDate);
+  if (endDate) params.append("end_date", endDate);
+  
+  if (params.toString()) {
+    url += `?${params.toString()}`;
+  }
+  const res = await api.get(url);
+  return res.data;
+};
+
 api.updateOrderStatus = async (orderId, newStatus) => {
   const res = await api.put(`/admin/orders/${orderId}/status`, { status: newStatus });
   return res.data;

@@ -170,3 +170,9 @@ class UserAdminOut(BaseModel):
     name: str
     phone: str
     role: str
+
+class StatisticsOut(BaseModel):
+    total_revenue: float
+    total_orders: int
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None

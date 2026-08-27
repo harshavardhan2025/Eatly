@@ -17,13 +17,13 @@ function Dashboard() {
 
   const tabQuery = searchParams.get("tab");
 
-  // Navigation tab state: "orders" | "menu" | "complaints" | "users"
+  // Navigation tab state: "orders" | "menu" | "complaints" | "users" | "statistics"
   const [activeTab, setActiveTab] = useState(
-    tabQuery && ["orders", "menu", "complaints", "users"].includes(tabQuery) ? tabQuery : "orders"
+    tabQuery && ["orders", "menu", "complaints", "users", "statistics"].includes(tabQuery) ? tabQuery : "orders"
   );
 
   useEffect(() => {
-    if (tabQuery && ["orders", "menu", "complaints", "users"].includes(tabQuery)) {
+    if (tabQuery && ["orders", "menu", "complaints", "users", "statistics"].includes(tabQuery)) {
       setActiveTab(tabQuery);
     }
   }, [tabQuery]);
@@ -65,6 +65,12 @@ function Dashboard() {
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [userSearchTerm, setUserSearchTerm] = useState("");
+
+  // Statistics State
+  const [statsData, setStatsData] = useState({ total_revenue: 0, total_orders: 0 });
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsStartDate, setStatsStartDate] = useState("");
+  const [statsEndDate, setStatsEndDate] = useState("");
 
   // 1. Fetch Orders
   const fetchOrders = async () => {
@@ -117,6 +123,25 @@ function Dashboard() {
       setUsersLoading(false);
     }
   };
+
+  // 5. Fetch Statistics
+  const fetchStatistics = async () => {
+    setStatsLoading(true);
+    try {
+      const data = await api.getAdminStatistics(statsStartDate, statsEndDate);
+      setStatsData(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "statistics") {
+      fetchStatistics();
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     fetchOrders();
@@ -328,6 +353,13 @@ function Dashboard() {
         >
           👥 Customers ({users.filter(u => u.role !== "admin").length} Total)
         </button>
+
+        <button
+          className={`admin-tab ${activeTab === "statistics" ? "active" : ""}`}
+          onClick={() => handleTabSwitch("statistics")}
+        >
+          📊 Statistics & Revenue
+        </button>
       </div>
 
       {/* TAB 1: ORDER ACCEPTING & QUEUE */}
@@ -408,21 +440,65 @@ function Dashboard() {
           {inProgressOrders.length > 0 && (
             <div className="admin-orders-box" style={{ marginTop: "30px" }}>
               <h2 className="admin-section-title">👨‍🍳 Kitchen Preparing ({inProgressOrders.length})</h2>
-              {inProgressOrders.map((order) => (
-                <div className="admin-order-card" key={order.id}>
-                  <div className="admin-order-top">
-                    <h3>Order #{order.id.slice(-6).toUpperCase()}</h3>
-                    <span className="status-badge preparing-badge">{order.status}</span>
+              
+              {/* Optional: Summary of all items to prepare */}
+              <div style={{ backgroundColor: "#fef3c7", padding: "15px", borderRadius: "8px", marginBottom: "20px", border: "1px solid #fde68a" }}>
+                <h3 style={{ color: "#b45309", fontSize: "16px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                  Kitchen Summary (To Cook Now)
+                </h3>
+                <ul style={{ listStyleType: "none", padding: 0, margin: 0, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "10px" }}>
+                  {Object.entries(
+                    inProgressOrders.flatMap(o => o.items || []).reduce((acc, item) => {
+                      acc[item.name] = (acc[item.name] || 0) + item.quantity;
+                      return acc;
+                    }, {})
+                  ).map(([itemName, totalQty], idx) => (
+                    <li key={idx} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "15px" }}>
+                      <span style={{ backgroundColor: "#d97706", color: "white", padding: "4px 8px", borderRadius: "4px", fontWeight: "bold", fontSize: "14px" }}>
+                        {totalQty}x
+                      </span>
+                      <span style={{ color: "#1e293b", fontWeight: "600" }}>{itemName}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
+                {inProgressOrders.map((order) => (
+                  <div className="admin-order-card" key={order.id} style={{ borderTop: "4px solid #d97706" }}>
+                    <div className="admin-order-top">
+                      <h3>Order #{order.id.slice(-6).toUpperCase()}</h3>
+                      <span className="status-badge preparing-badge">{order.status}</span>
+                    </div>
+                    
+                    <div style={{ backgroundColor: "#f8fafc", padding: "12px", borderRadius: "8px", margin: "10px 0" }}>
+                      <p style={{ margin: "0 0 5px 0", fontSize: "14px" }}><strong>Customer:</strong> {order.customer_name}</p>
+                      <p style={{ margin: "0", fontSize: "14px" }}>
+                        <strong>Phone:</strong> <a href={`tel:${order.customer_phone}`} style={{ textDecoration: 'none', color: '#2563eb', fontWeight: "500" }}>📞 {order.customer_phone}</a>
+                      </p>
+                    </div>
+                    
+                    <div className="order-items-summary" style={{ backgroundColor: "#fffbeb", padding: "15px", borderRadius: "8px", border: "1px dashed #fcd34d" }}>
+                      <p style={{ margin: "0 0 10px 0", color: "#92400e", fontWeight: "bold" }}>Items to Prepare:</p>
+                      <ul style={{ listStyleType: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
+                        {order.items?.map((it, idx) => (
+                          <li key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: idx < order.items.length - 1 ? "1px solid #fde68a" : "none", paddingBottom: idx < order.items.length - 1 ? "8px" : "0" }}>
+                            <span style={{ fontWeight: "600", color: "#1e293b" }}>{it.name}</span>
+                            <span style={{ backgroundColor: "#d97706", color: "white", padding: "4px 8px", borderRadius: "12px", fontWeight: "bold", fontSize: "14px" }}>x{it.quantity}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div className="admin-action-buttons" style={{ marginTop: "15px" }}>
+                      <button className="btn-status" style={{ width: "100%", backgroundColor: "#10b981", color: "white", padding: "10px", borderRadius: "6px", fontWeight: "bold", border: "none", cursor: "pointer" }} onClick={() => handleOrderStatus(order.id, "DELIVERED")}>
+                        🚴 Mark Out for Delivery
+                      </button>
+                    </div>
                   </div>
-                  <p><strong>Customer:</strong> {order.customer_name} (<a href={`tel:${order.customer_phone}`} style={{ textDecoration: 'none', color: '#007bff' }}>📞 {order.customer_phone}</a>)</p>
-                  <p><strong>Items:</strong> {order.items?.map(it => `${it.name} x${it.quantity}`).join(", ")}</p>
-                  <div className="admin-action-buttons">
-                    <button className="btn-status" onClick={() => handleOrderStatus(order.id, "DELIVERED")}>
-                      🚴 Mark Out for Delivery / Delivered
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -663,6 +739,67 @@ function Dashboard() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* TAB 5: STATISTICS */}
+      {activeTab === "statistics" && (
+        <div className="admin-section">
+          <div className="admin-section-header">
+            <h2>📊 Revenue & Order Statistics</h2>
+          </div>
+
+          <div className="stats-filter-bar" style={{ display: "flex", gap: "15px", marginBottom: "20px", alignItems: "flex-end", flexWrap: "wrap" }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label>Start Date</label>
+              <input 
+                type="date" 
+                value={statsStartDate} 
+                onChange={(e) => setStatsStartDate(e.target.value)} 
+                className="select-input"
+                style={{ padding: "8px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+              />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label>End Date</label>
+              <input 
+                type="date" 
+                value={statsEndDate} 
+                onChange={(e) => setStatsEndDate(e.target.value)} 
+                className="select-input"
+                style={{ padding: "8px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+              />
+            </div>
+            <button 
+              onClick={fetchStatistics} 
+              className="btn-add-food" 
+              style={{ padding: "10px 20px" }}
+              disabled={statsLoading}
+            >
+              {statsLoading ? "Loading..." : "Get Statistics"}
+            </button>
+          </div>
+
+          <div className="stats-cards-container" style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+            <div className="stats-card" style={{ flex: "1", minWidth: "250px", backgroundColor: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)", border: "1px solid #e2e8f0" }}>
+              <div style={{ fontSize: "32px", marginBottom: "10px" }}>💰</div>
+              <h3 style={{ color: "#64748b", fontSize: "14px", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "5px" }}>Total Revenue</h3>
+              <p style={{ fontSize: "28px", fontWeight: "700", color: "#0f172a", margin: 0 }}>
+                ₹{statsData.total_revenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              </p>
+              <p style={{ color: "#94a3b8", fontSize: "12px", marginTop: "10px" }}>
+                *Excludes cancelled & rejected orders
+              </p>
+            </div>
+
+            <div className="stats-card" style={{ flex: "1", minWidth: "250px", backgroundColor: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)", border: "1px solid #e2e8f0" }}>
+              <div style={{ fontSize: "32px", marginBottom: "10px" }}>📦</div>
+              <h3 style={{ color: "#64748b", fontSize: "14px", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "5px" }}>Total Valid Orders</h3>
+              <p style={{ fontSize: "28px", fontWeight: "700", color: "#0f172a", margin: 0 }}>
+                {statsData.total_orders}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

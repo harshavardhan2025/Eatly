@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
 from datetime import datetime, timezone
 from bson import ObjectId
-from ..models.schemas import OrderCreate, OrderOut, OrderItemDetail, OrderStatusUpdate
+from ..models.schemas import OrderCreate, OrderOut, OrderItemDetail, OrderStatusUpdate, StatisticsOut
 from ..database import orders_collection, food_items_collection
 from ..core.security import get_current_user, get_current_admin
 
@@ -113,6 +113,49 @@ def get_order_by_id(order_id: str, current_user: dict = Depends(get_current_user
 def get_all_orders_admin(admin: dict = Depends(get_current_admin)):
     cursor = orders_collection.find().sort("created_at", -1)
     return [doc_to_order(doc) for doc in cursor]
+
+@router.get("/api/admin/statistics", response_model=StatisticsOut)
+def get_admin_statistics(
+    start_date: str = None,
+    end_date: str = None,
+    admin: dict = Depends(get_current_admin)
+):
+    query = {}
+    
+    if start_date or end_date:
+        query["created_at"] = {}
+        if start_date:
+            try:
+                dt = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                query["created_at"]["$gte"] = dt
+            except ValueError:
+                pass
+        if end_date:
+            try:
+                dt = datetime.strptime(end_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
+                query["created_at"]["$lte"] = dt
+            except ValueError:
+                pass
+        
+        if not query["created_at"]:
+            del query["created_at"]
+
+    query["status"] = {"$nin": ["CANCELLED", "REJECTED"]}
+
+    cursor = orders_collection.find(query)
+    total_revenue = 0.0
+    total_orders = 0
+    
+    for doc in cursor:
+        total_orders += 1
+        total_revenue += float(doc.get("total_amount", 0))
+
+    return StatisticsOut(
+        total_revenue=round(total_revenue, 2),
+        total_orders=total_orders,
+        start_date=start_date,
+        end_date=end_date
+    )
 
 @router.put("/api/admin/orders/{order_id}/status", response_model=OrderOut)
 def update_order_status(
