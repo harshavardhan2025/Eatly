@@ -5,6 +5,8 @@ from contextlib import asynccontextmanager
 
 from .core.config import settings
 from .core.security import get_password_hash
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from .database import db, users_collection, food_items_collection, orders_collection, complaints_collection
 from .routers import auth, menu, orders, users, password_reset
 from .routes import food as food_routes
@@ -219,6 +221,9 @@ async def lifespan(app: FastAPI):
             print("[SEED] Seeded 2 complaints with FK links to users + orders.")
         else:
             print(f"[INFO] Skipping DB seed because ENVIRONMENT={settings.ENVIRONMENT} and SEED_DB is not true.")
+
+        # ── Initialize FastAPI Cache ───────────────────────────────────────────
+        FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
 
     except Exception as e:
         print(f"[WARN] Startup init note: {e}")

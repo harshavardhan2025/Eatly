@@ -5,6 +5,7 @@ from ..models.schemas import FoodItemCreate, FoodItemUpdate, FoodItemOut
 from ..database import food_items_collection
 from ..database import food_items_collection
 from ..core.security import get_current_admin, get_current_user
+from fastapi_cache.decorator import cache
 
 router = APIRouter(tags=["Menu / Food Items"])
 
@@ -31,6 +32,7 @@ def doc_to_food_item(doc: dict) -> FoodItemOut:
 
 @router.get("/api/food-items", response_model=List[FoodItemOut])
 @router.get("/api/food-items/", response_model=List[FoodItemOut])
+@cache(expire=60)
 def get_all_food_items():
     cursor = food_items_collection.find()
     return [doc_to_food_item(item) for item in cursor]
