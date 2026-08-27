@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from .core.config import settings
 from .core.security import get_password_hash
 from .database import db, users_collection, food_items_collection, orders_collection, complaints_collection
-from .routers import auth, menu, orders, users, password_reset, dashboard
+from .routers import auth, menu, orders, users, password_reset
 from .routes import food as food_routes
 
 # ...
@@ -232,10 +232,6 @@ app = FastAPI(
 )
 
 # CORS Configuration
-from fastapi.middleware.gzip import GZipMiddleware
-
-app.add_middleware(GZipMiddleware, minimum_size=1000)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -250,7 +246,6 @@ app.include_router(menu.router)
 app.include_router(orders.router)
 app.include_router(users.router)
 app.include_router(password_reset.router)
-app.include_router(dashboard.router)
 
 
 from .models.schemas import UserOut

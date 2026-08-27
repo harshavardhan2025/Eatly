@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import "./AdminPremium.css";
 
 function Dashboard() {
   const { logout, user, isAdmin, loading } = useAuth();
@@ -144,30 +143,11 @@ function Dashboard() {
     }
   }, [activeTab]);
 
-  // Initial Unified Fetch
-  const fetchDashboardData = async () => {
-    setOrdersLoading(true);
-    setMenuLoading(true);
-    setComplaintsLoading(true);
-    setUsersLoading(true);
-    try {
-      const data = await api.getAdminDashboardSync();
-      setOrders(data.orders || []);
-      setFoods(data.menu || []);
-      setComplaints(data.complaints || []);
-      setUsers(data.users || []);
-    } catch (e) {
-      console.error("Failed to sync dashboard:", e);
-    } finally {
-      setOrdersLoading(false);
-      setMenuLoading(false);
-      setComplaintsLoading(false);
-      setUsersLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchDashboardData();
+    fetchOrders();
+    fetchMenu();
+    fetchComplaints();
+    fetchUsers();
   }, []);
 
   // Handlers for Orders
@@ -390,16 +370,7 @@ function Dashboard() {
             <h2 className="admin-section-title">🚨 Incoming New Orders ({newOrders.length})</h2>
 
             {ordersLoading ? (
-              <div className="skeleton-container">
-                {[1, 2, 3].map((n) => (
-                  <div key={n} className="skeleton-card" style={{ height: '220px', marginBottom: '20px' }}>
-                    <div className="skeleton-header"></div>
-                    <div className="skeleton-line" style={{ width: '60%' }}></div>
-                    <div className="skeleton-line" style={{ width: '80%' }}></div>
-                    <div className="skeleton-line" style={{ width: '40%' }}></div>
-                  </div>
-                ))}
-              </div>
+              <p>Loading active orders queue...</p>
             ) : newOrders.length === 0 ? (
               <div className="admin-empty-state">
                 <span>✨</span>
@@ -568,19 +539,7 @@ function Dashboard() {
           </div>
 
           {menuLoading ? (
-            <div className="admin-menu-grid">
-              {[1, 2, 3, 4, 5, 6].map((n) => (
-                <div key={n} className="skeleton-card" style={{ height: '400px' }}>
-                  <div className="skeleton-img"></div>
-                  <div style={{ padding: '20px' }}>
-                    <div className="skeleton-header"></div>
-                    <div className="skeleton-line" style={{ width: '100%' }}></div>
-                    <div className="skeleton-line" style={{ width: '80%' }}></div>
-                    <div className="skeleton-line" style={{ width: '40%' }}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p>Loading food menu items...</p>
           ) : filteredFoods.length === 0 ? (
             <div className="admin-empty-state">
               <span>🍽️</span>
@@ -653,15 +612,7 @@ function Dashboard() {
           <h2 className="admin-section-title">💬 Customer Complaints & Support Queue</h2>
 
           {complaintsLoading ? (
-            <div className="skeleton-container">
-              {[1, 2].map((n) => (
-                <div key={n} className="skeleton-card" style={{ height: '140px', marginBottom: '15px' }}>
-                  <div className="skeleton-header"></div>
-                  <div className="skeleton-line" style={{ width: '90%' }}></div>
-                  <div className="skeleton-line" style={{ width: '50%' }}></div>
-                </div>
-              ))}
-            </div>
+            <p>Loading customer complaints...</p>
           ) : complaints.length === 0 ? (
             <div className="admin-empty-state">
               <span>🎉</span>
@@ -741,17 +692,7 @@ function Dashboard() {
           </div>
 
           {usersLoading ? (
-            <div className="admin-menu-grid">
-              {[1, 2, 3, 4].map((n) => (
-                <div key={n} className="skeleton-card" style={{ height: '160px' }}>
-                  <div style={{ padding: '20px' }}>
-                    <div className="skeleton-header"></div>
-                    <div className="skeleton-line" style={{ width: '60%' }}></div>
-                    <div className="skeleton-line" style={{ width: '40%' }}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p>Loading customers...</p>
           ) : users.filter(u => u.role !== 'admin').length === 0 ? (
              <div className="admin-empty-state">
                <span>👥</span>
