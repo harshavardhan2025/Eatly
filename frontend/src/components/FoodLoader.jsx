@@ -1,28 +1,31 @@
 import React, { useState, useEffect } from "react";
 
 const FOOD_EMOJIS = [
-  "🍗", "🍲", "🍖", "🦈",
-  "🍤", "🥚", "🍳", "🫓",
-  "🥘", "🍲", "🥣", "🥦", "🥔",
-  "🍆", "🌶️", "🍅", "🧅", "🧄",
-  "🥕", "🫛", "🥬", "🌽", "🥗",
-  "🥟", "🍢", "🧆", "🍜", "🍝",
-  "🥞", "🍘", "🍡", "🍮", "🍨",
-  "🍧", "🍰", "🍩", "🍪", "☕",
-  "🥤", "🧋", "🍵", "🥛", "🍌",
-  "🥭", "🍊", "🍋", "🥥", "🍍",
-  "🍜", "🥘", "🍛", "🥟", "🍕", "🍔", "🍣", "🍱",
-  "🍗", "🍤", "🥗", "🌮", "🍟", "🍳", "🍰", "🍨",
-  "🍦", "🧋", "🥤", "☕", "🥂", "🍽️", "🛎️", "✨"
+  "🍗", "🍲", "🍖", "🍤", "🍳", "🫓",
+  "🥘", "🥣", "🥗", "🥟", "🍢", "🧆", 
+  "🍜", "🍝", "🥞", "🍣", "🍱", "🍕", 
+  "🍔", "🌮", "🍟", "🍰", "🍩", "🍨", 
+  "🍦", "🧋", "🥤", "☕", "🥥", "🍍",
+  "🍓", "🥑", "🌶️", "✨"
 ];
 
+function getRandomIndex(excludeIndex = -1) {
+  let nextIndex;
+  do {
+    nextIndex = Math.floor(Math.random() * FOOD_EMOJIS.length);
+  } while (nextIndex === excludeIndex && FOOD_EMOJIS.length > 1);
+  return nextIndex;
+}
+
 function FoodLoader({ text = "⏳ 🥘 Preparing delicious food..." }) {
-  const [index, setIndex] = useState(0);
+  // Start with a random emoji every time
+  const [index, setIndex] = useState(() => getRandomIndex());
 
   useEffect(() => {
+    // Fast dynamic random emoji switcher (350ms)
     const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % FOOD_EMOJIS.length);
-    }, 1000);
+      setIndex((prev) => getRandomIndex(prev));
+    }, 350);
 
     return () => clearInterval(interval);
   }, []);

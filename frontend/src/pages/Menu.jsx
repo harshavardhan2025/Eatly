@@ -14,23 +14,30 @@ function Menu() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-
     const loadFoods = async () => {
       try {
+        const cached = localStorage.getItem("food_items_cache");
+        if (cached) {
+          setFoods(JSON.parse(cached));
+          setLoading(false); // Stop loading immediately if cached data exists
+        }
+
         const data = await api.getFoodItems();
         setFoods(data || []);
+        localStorage.setItem("food_items_cache", JSON.stringify(data || []));
       } catch (error) {
         console.error(error);
-        setError(
-          error.message || "Unable to load the menu."
-        );
+        if (!localStorage.getItem("food_items_cache")) {
+          setError(
+            error.message || "Unable to load the menu."
+          );
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadFoods();
-
   }, []);
 
   useEffect(() => {

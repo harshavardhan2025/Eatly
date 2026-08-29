@@ -13,8 +13,18 @@ function Home() {
   useEffect(() => {
     const fetchPopular = async () => {
       try {
+        const cached = localStorage.getItem("food_items_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.length > 0) {
+            const availableDishes = parsed.filter(food => food.available !== false && food.is_available !== false);
+            setPopularDishes(availableDishes.slice(0, 3));
+          }
+        }
+
         const data = await api.getFoodItems();
         if (data && data.length > 0) {
+          localStorage.setItem("food_items_cache", JSON.stringify(data));
           const availableDishes = data.filter(food => food.available !== false && food.is_available !== false);
           setPopularDishes(availableDishes.slice(0, 3));
         }

@@ -1670,7 +1670,7 @@ button {
 }
 
 .pop-animation {
-  animation: popIcon 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: popIcon 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes spinRing {
