@@ -22,10 +22,10 @@ function FoodLoader({ text = "⏳ 🥘 Preparing delicious food..." }) {
   const [index, setIndex] = useState(() => getRandomIndex());
 
   useEffect(() => {
-    // Fast dynamic random emoji switcher (350ms)
+    // Dynamic random emoji switcher (1000ms = 1 sec)
     const interval = setInterval(() => {
       setIndex((prev) => getRandomIndex(prev));
-    }, 350);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);

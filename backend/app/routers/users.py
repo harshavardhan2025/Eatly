@@ -23,9 +23,12 @@ def doc_to_user(doc: dict) -> UserAdminOut:
     )
 
 
+from fastapi_cache.decorator import cache
+
 # --- Admin: Full User CRUD ---
 
 @router.get("/api/admin/users", response_model=List[UserAdminOut])
+@cache(expire=60)
 def admin_get_all_users(admin: dict = Depends(get_current_admin)):
     """List all registered users (admin only)."""
     cursor = users_collection.find().sort("_id", -1)

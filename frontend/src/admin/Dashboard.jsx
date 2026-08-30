@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Package, History, UtensilsCrossed, ChefHat, Users, BarChart3, MessageSquare, LogOut } from "lucide-react";
 
 function Dashboard() {
   const { logout, user, isAdmin, loading } = useAuth();
@@ -16,26 +17,37 @@ function Dashboard() {
   }, [user, isAdmin, loading, navigate]);
 
   const tabQuery = searchParams.get("tab");
-
-  // Navigation tab state: "orders" | "menu" | "complaints" | "users" | "statistics"
-  const [activeTab, setActiveTab] = useState(
-    tabQuery && ["orders", "menu", "complaints", "users", "statistics"].includes(tabQuery) ? tabQuery : "orders"
-  );
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (tabQuery && ["orders", "menu", "complaints", "users", "statistics"].includes(tabQuery)) {
+    const handleToggle = () => setMobileSidebarOpen(prev => !prev);
+    window.addEventListener('toggle-admin-sidebar', handleToggle);
+    return () => window.removeEventListener('toggle-admin-sidebar', handleToggle);
+  }, []);
+
+  // Navigation tab state
+  const [activeTab, setActiveTab] = useState(
+    tabQuery && ["active_orders", "order_history", "menu", "accepted_orders", "users", "statistics", "complaints"].includes(tabQuery) ? tabQuery : "active_orders"
+  );
+  
+  const [historyFilter, setHistoryFilter] = useState("all");
+
+  useEffect(() => {
+    if (tabQuery && ["active_orders", "order_history", "menu", "accepted_orders", "users", "statistics", "complaints"].includes(tabQuery)) {
       setActiveTab(tabQuery);
     }
   }, [tabQuery]);
 
   const handleTabSwitch = (tabName) => {
     setActiveTab(tabName);
+    setMobileSidebarOpen(false);
     setSearchParams({ tab: tabName });
   };
 
   // Orders State
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
+  const [acceptedSearchTerm, setAcceptedSearchTerm] = useState("");
 
   // Menu State & Sub-Filter
   const [foods, setFoods] = useState([]);
@@ -89,7 +101,7 @@ function Dashboard() {
   const fetchMenu = async () => {
     setMenuLoading(true);
     try {
-      const data = await api.getFoodItems();
+      const data = await api.getAdminFoodItems();
       setFoods(data || []);
     } catch (e) {
       console.error(e);
@@ -148,6 +160,13 @@ function Dashboard() {
     fetchMenu();
     fetchComplaints();
     fetchUsers();
+
+    // Auto-refresh orders every 5 seconds
+    const orderInterval = setInterval(() => {
+      fetchOrders();
+    }, 5000);
+
+    return () => clearInterval(orderInterval);
   }, []);
 
   // Handlers for Orders
@@ -303,204 +322,266 @@ function Dashboard() {
   );
 
   // Filtered Food List by Availability Sub-Tab
-  const filteredFoods = foods.filter((f) => {
-    if (menuAvailFilter === "available") return f.is_available !== false;
-    if (menuAvailFilter === "unavailable") return f.is_available === false;
-    return true;
-  });
+  const filteredFoods = useMemo(() => {
+    return foods.filter((f) => {
+      if (menuAvailFilter === "available") return f.is_available !== false;
+      if (menuAvailFilter === "unavailable") return f.is_available === false;
+      return true;
+    });
+  }, [foods, menuAvailFilter]);
+
+
 
   // Filtered Orders
-  const newOrders = orders.filter((o) => o.status === "PLACED" || o.status === "NEW");
-  const inProgressOrders = orders.filter((o) => o.status === "ACCEPTED" || o.status === "PREPARING");
+  const newOrders = useMemo(() => orders.filter((o) => o.status === "PLACED" || o.status === "NEW"), [orders]);
+  
+  const inProgressOrdersRaw = useMemo(() => orders.filter((o) => o.status === "ACCEPTED" || o.status === "PREPARING" || o.status === "READY"), [orders]);
+  
+  const inProgressOrders = useMemo(() => {
+    return inProgressOrdersRaw.filter((o) => {
+      if (!acceptedSearchTerm) return true;
+      const term = acceptedSearchTerm.toLowerCase();
+      return (
+        o.id.toLowerCase().includes(term) ||
+        (o.customer_name && o.customer_name.toLowerCase().includes(term)) ||
+        (o.customer_phone && o.customer_phone.includes(term))
+      );
+    });
+  }, [inProgressOrdersRaw, acceptedSearchTerm]);
+
+  const historyOrdersRaw = useMemo(() => orders.filter((o) => ["DELIVERED", "REJECTED", "CANCELLED"].includes(o.status)), [orders]);
+  const historyOrders = useMemo(() => historyFilter === "all" ? historyOrdersRaw : historyOrdersRaw.filter(o => o.status === historyFilter), [historyOrdersRaw, historyFilter]);
 
   return (
-    <main className="admin-page">
-
-      {/* Admin Dashboard Header */}
-      <div className="admin-header">
-        <div>
-          <p className="admin-badge">RESTAURANT ADMIN DASHBOARD</p>
-          <h1>Control Panel</h1>
+    <div className="admin-layout">
+      {/* Mobile Sidebar Overlay */}
+      {mobileSidebarOpen && (
+        <div 
+          className="admin-sidebar-overlay" 
+          onClick={() => setMobileSidebarOpen(false)}
+        ></div>
+      )}
+      
+      {/* Sidebar Navigation */}
+      <aside className={`admin-sidebar ${mobileSidebarOpen ? "open" : ""}`}>
+        <div className="admin-sidebar-header">
+          <p className="admin-badge">RESTAURANT ADMIN</p>
+          <h2>Control Panel</h2>
+          <button className="mobile-close-btn" onClick={() => setMobileSidebarOpen(false)}>×</button>
         </div>
-      </div>
+        <nav className="admin-sidebar-nav">
+          <button
+            className={`admin-sidebar-btn ${activeTab === "active_orders" ? "active" : ""}`}
+            onClick={() => handleTabSwitch("active_orders")}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <Package size={18} /> Active Orders ({newOrders.length} New)
+          </button>
 
-      {/* Admin Navigation Tabs (Only: Order Accepting, Menu Management, Complaints) */}
-      <div className="admin-tabs-bar">
-        <button
-          className={`admin-tab ${activeTab === "orders" ? "active" : ""}`}
-          onClick={() => handleTabSwitch("orders")}
-        >
-          📋 Order Queue ({newOrders.length} New)
-        </button>
+          <button
+            className={`admin-sidebar-btn ${activeTab === "accepted_orders" ? "active" : ""}`}
+            onClick={() => handleTabSwitch("accepted_orders")}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <ChefHat size={18} /> Accepted Orders ({inProgressOrders.length} Preparing)
+          </button>
+          
+          <button
+            className={`admin-sidebar-btn ${activeTab === "complaints" ? "active" : ""}`}
+            onClick={() => handleTabSwitch("complaints")}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <MessageSquare size={18} /> Complaints ({complaints.filter(c => c.status === "OPEN").length} Open)
+          </button>
 
-        <button
-          className={`admin-tab ${activeTab === "menu" ? "active" : ""}`}
-          onClick={() => handleTabSwitch("menu")}
-        >
-          🍽️ Menu Management ({foods.length} Items)
-        </button>
+          <button
+            className={`admin-sidebar-btn ${activeTab === "menu" ? "active" : ""}`}
+            onClick={() => handleTabSwitch("menu")}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <UtensilsCrossed size={18} /> Menu Management ({foods.length} Items)
+          </button>
 
-        <button
-          className={`admin-tab ${activeTab === "complaints" ? "active" : ""}`}
-          onClick={() => handleTabSwitch("complaints")}
-        >
-          💬 Complaints ({complaints.filter(c => c.status === "OPEN").length} Open)
-        </button>
+          <button
+            className={`admin-sidebar-btn ${activeTab === "users" ? "active" : ""}`}
+            onClick={() => handleTabSwitch("users")}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <Users size={18} /> Customers ({users.filter(u => u.role !== "admin").length} Total)
+          </button>
+          
+          <button
+            className={`admin-sidebar-btn ${activeTab === "order_history" ? "active" : ""}`}
+            onClick={() => handleTabSwitch("order_history")}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <History size={18} /> Order History ({historyOrdersRaw.length})
+          </button>
 
-        <button
-          className={`admin-tab ${activeTab === "users" ? "active" : ""}`}
-          onClick={() => handleTabSwitch("users")}
-        >
-          👥 Customers ({users.filter(u => u.role !== "admin").length} Total)
-        </button>
+          <button
+            className={`admin-sidebar-btn ${activeTab === "statistics" ? "active" : ""}`}
+            onClick={() => handleTabSwitch("statistics")}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <BarChart3 size={18} /> Statistics & Revenue
+          </button>
+          
+          <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '10px 15px' }} />
 
-        <button
-          className={`admin-tab ${activeTab === "statistics" ? "active" : ""}`}
-          onClick={() => handleTabSwitch("statistics")}
-        >
-          📊 Statistics & Revenue
-        </button>
-      </div>
+          <button
+            className="admin-sidebar-btn"
+            onClick={logout}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#dc2626' }}
+          >
+            <LogOut size={18} /> Logout
+          </button>
+        </nav>
+      </aside>
 
-      {/* TAB 1: ORDER ACCEPTING & QUEUE */}
-      {activeTab === "orders" && (
+      {/* Main Content Area */}
+      <main className="admin-main-content">
+
+      {/* TAB 1: ACTIVE ORDERS */}
+      {activeTab === "active_orders" && (
         <div className="admin-section">
           {/* New Orders Queue */}
           <div className="admin-orders-box">
             <h2 className="admin-section-title">🚨 Incoming New Orders ({newOrders.length})</h2>
 
+                {ordersLoading ? (
+                  <p>Loading active orders queue...</p>
+                ) : newOrders.length === 0 ? (
+                  <div className="admin-empty-state">
+                    <span>✨</span>
+                    <p>No new incoming orders at the moment.</p>
+                  </div>
+                ) : (
+                  newOrders.map((order) => (
+                    <div className="admin-order-card highlight" key={order.id}>
+                      <div className="admin-order-top">
+                        <div>
+                          <h3>Order #{order.id.slice(-6).toUpperCase()}</h3>
+                          <span className="order-time">{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <span className="status-badge new-badge">NEW ORDER</span>
+                      </div>
+
+                      <div className="customer-info-box">
+                        <p><strong>Customer:</strong> {order.customer_name}</p>
+                        <p>
+                          <strong>Phone:</strong>{" "}
+                          <a href={`tel:+91${order.customer_phone}`} className="phone-link">📞 {order.customer_phone}</a>
+                          {" | "}
+                          <a href={`https://wa.me/91${order.customer_phone}`} target="_blank" rel="noreferrer" className="wa-link" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#25D366" viewBox="0 0 16 16" style={{ marginRight: '6px' }}>
+                              <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                            </svg>
+                            WhatsApp
+                          </a>
+                        </p>
+                        <p><strong>Delivery Address:</strong> {order.address}</p>
+                      </div>
+
+                      <div className="order-items-summary">
+                        <p><strong>Ordered Items:</strong></p>
+                        <ul>
+                          {order.items?.map((it, idx) => (
+                            <li key={idx}>{it.name} × {it.quantity} (₹{it.subtotal || it.price * it.quantity})</li>
+                          ))}
+                        </ul>
+                        <div className="total-bar">
+                          <span>Total Amount:</span>
+                          <strong>₹{order.total_amount}</strong>
+                        </div>
+                      </div>
+
+                      {/* Accept / Reject Buttons */}
+                      <div className="admin-action-buttons">
+                        <button
+                          className="btn-accept"
+                          onClick={() => handleOrderStatus(order.id, "ACCEPTED")}
+                        >
+                          ✓ Accept Order
+                        </button>
+                        <button
+                          className="btn-reject"
+                          onClick={() => handleOrderStatus(order.id, "REJECTED")}
+                        >
+                          ✕ Reject Order
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+        </div>
+      )}
+
+      {/* TAB 1.5: ORDER HISTORY */}
+      {activeTab === "order_history" && (
+        <div className="admin-section">
+          <div className="admin-orders-box">
+            <h2 className="admin-section-title">🕒 Order History ({historyOrdersRaw.length})</h2>
+            
+            {/* History Filter */}
+            <div className="admin-sub-filter-bar">
+              <button className={`sub-filter-pill ${historyFilter === "all" ? "active" : ""}`} onClick={() => setHistoryFilter("all")}>All ({historyOrdersRaw.length})</button>
+              <button className={`sub-filter-pill ${historyFilter === "DELIVERED" ? "active" : ""}`} onClick={() => setHistoryFilter("DELIVERED")}>Delivered</button>
+              <button className={`sub-filter-pill ${historyFilter === "REJECTED" ? "active" : ""}`} onClick={() => setHistoryFilter("REJECTED")}>Rejected</button>
+              <button className={`sub-filter-pill ${historyFilter === "CANCELLED" ? "active" : ""}`} onClick={() => setHistoryFilter("CANCELLED")}>Cancelled</button>
+            </div>
+
             {ordersLoading ? (
-              <p>Loading active orders queue...</p>
-            ) : newOrders.length === 0 ? (
+              <p>Loading history...</p>
+            ) : historyOrders.length === 0 ? (
               <div className="admin-empty-state">
-                <span>✨</span>
-                <p>No new incoming orders at the moment.</p>
+                <span>📜</span>
+                <p>No past orders match this filter.</p>
               </div>
             ) : (
-              newOrders.map((order) => (
-                <div className="admin-order-card highlight" key={order.id}>
-                  <div className="admin-order-top">
-                    <div>
-                      <h3>Order #{order.id.slice(-6).toUpperCase()}</h3>
-                      <span className="order-time">{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                    <span className="status-badge new-badge">NEW ORDER</span>
-                  </div>
-
-                  <div className="customer-info-box">
-                    <p><strong>Customer:</strong> {order.customer_name}</p>
-                    <p>
-                      <strong>Phone:</strong>{" "}
-                      <a href={`tel:+91${order.customer_phone}`} className="phone-link">📞 {order.customer_phone}</a>
-                      {" | "}
-                      <a href={`https://wa.me/91${order.customer_phone}`} target="_blank" rel="noreferrer" className="wa-link" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#25D366" viewBox="0 0 16 16" style={{ marginRight: '6px' }}>
-                          <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
-                        </svg>
-                        WhatsApp
-                      </a>
-                    </p>
-                    <p><strong>Delivery Address:</strong> {order.address}</p>
-                  </div>
-
-                  <div className="order-items-summary">
-                    <p><strong>Ordered Items:</strong></p>
-                    <ul>
-                      {order.items?.map((it, idx) => (
-                        <li key={idx}>{it.name} × {it.quantity} (₹{it.subtotal || it.price * it.quantity})</li>
-                      ))}
-                    </ul>
-                    <div className="total-bar">
-                      <span>Total Amount:</span>
-                      <strong>₹{order.total_amount}</strong>
-                    </div>
-                  </div>
-
-                  {/* Accept / Reject Buttons */}
-                  <div className="admin-action-buttons">
-                    <button
-                      className="btn-accept"
-                      onClick={() => handleOrderStatus(order.id, "ACCEPTED")}
-                    >
-                      ✓ Accept Order
-                    </button>
-                    <button
-                      className="btn-reject"
-                      onClick={() => handleOrderStatus(order.id, "REJECTED")}
-                    >
-                      ✕ Reject Order
-                    </button>
-                  </div>
-                </div>
-              ))
+              <div style={{ overflowX: 'auto' }}>
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Date & Time</th>
+                      <th>Customer</th>
+                      <th>Items</th>
+                      <th>Total Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historyOrders.map((order) => (
+                      <tr key={order.id}>
+                        <td><strong>#{order.id.slice(-6).toUpperCase()}</strong></td>
+                        <td>{new Date(order.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
+                        <td>
+                          {order.customer_name}<br/>
+                          <a href={`tel:${order.customer_phone}`} style={{ textDecoration: 'none', color: '#2563eb', fontSize: '13px' }}>{order.customer_phone}</a>
+                        </td>
+                        <td>
+                          <ul style={{ listStyleType: "none", padding: 0, margin: 0, fontSize: "14px" }}>
+                            {order.items?.map((it, idx) => (
+                              <li key={idx} style={{ paddingBottom: idx < order.items.length - 1 ? "4px" : "0" }}>
+                                {it.name} <strong style={{color: '#d97706'}}>x{it.quantity}</strong>
+                              </li>
+                            ))}
+                          </ul>
+                        </td>
+                        <td><strong>₹{order.total_amount}</strong></td>
+                        <td>
+                          <span className={`status-badge ${order.status === 'DELIVERED' ? 'resolved-badge' : 'rejected-badge'}`} style={{ backgroundColor: order.status === 'DELIVERED' ? '#10b981' : '#ef4444', color: 'white', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
+                            {order.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
-
-          {/* Orders in Preparation */}
-          {inProgressOrders.length > 0 && (
-            <div className="admin-orders-box" style={{ marginTop: "30px" }}>
-              <h2 className="admin-section-title">👨‍🍳 Kitchen Preparing ({inProgressOrders.length})</h2>
-              
-              {/* Optional: Summary of all items to prepare */}
-              <div style={{ backgroundColor: "#fef3c7", padding: "15px", borderRadius: "8px", marginBottom: "20px", border: "1px solid #fde68a" }}>
-                <h3 style={{ color: "#b45309", fontSize: "16px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                  Kitchen Summary (To Cook Now)
-                </h3>
-                <ul style={{ listStyleType: "none", padding: 0, margin: 0, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "10px" }}>
-                  {Object.entries(
-                    inProgressOrders.flatMap(o => o.items || []).reduce((acc, item) => {
-                      acc[item.name] = (acc[item.name] || 0) + item.quantity;
-                      return acc;
-                    }, {})
-                  ).map(([itemName, totalQty], idx) => (
-                    <li key={idx} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "15px" }}>
-                      <span style={{ backgroundColor: "#d97706", color: "white", padding: "4px 8px", borderRadius: "4px", fontWeight: "bold", fontSize: "14px" }}>
-                        {totalQty}x
-                      </span>
-                      <span style={{ color: "#1e293b", fontWeight: "600" }}>{itemName}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
-                {inProgressOrders.map((order) => (
-                  <div className="admin-order-card" key={order.id} style={{ borderTop: "4px solid #d97706" }}>
-                    <div className="admin-order-top">
-                      <h3>Order #{order.id.slice(-6).toUpperCase()}</h3>
-                      <span className="status-badge preparing-badge">{order.status}</span>
-                    </div>
-                    
-                    <div style={{ backgroundColor: "#f8fafc", padding: "12px", borderRadius: "8px", margin: "10px 0" }}>
-                      <p style={{ margin: "0 0 5px 0", fontSize: "14px" }}><strong>Customer:</strong> {order.customer_name}</p>
-                      <p style={{ margin: "0", fontSize: "14px" }}>
-                        <strong>Phone:</strong> <a href={`tel:${order.customer_phone}`} style={{ textDecoration: 'none', color: '#2563eb', fontWeight: "500" }}>📞 {order.customer_phone}</a>
-                      </p>
-                    </div>
-                    
-                    <div className="order-items-summary" style={{ backgroundColor: "#fffbeb", padding: "15px", borderRadius: "8px", border: "1px dashed #fcd34d" }}>
-                      <p style={{ margin: "0 0 10px 0", color: "#92400e", fontWeight: "bold" }}>Items to Prepare:</p>
-                      <ul style={{ listStyleType: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
-                        {order.items?.map((it, idx) => (
-                          <li key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: idx < order.items.length - 1 ? "1px solid #fde68a" : "none", paddingBottom: idx < order.items.length - 1 ? "8px" : "0" }}>
-                            <span style={{ fontWeight: "600", color: "#1e293b" }}>{it.name}</span>
-                            <span style={{ backgroundColor: "#d97706", color: "white", padding: "4px 8px", borderRadius: "12px", fontWeight: "bold", fontSize: "14px" }}>x{it.quantity}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div className="admin-action-buttons" style={{ marginTop: "15px" }}>
-                      <button className="btn-status" style={{ width: "100%", backgroundColor: "#10b981", color: "white", padding: "10px", borderRadius: "6px", fontWeight: "bold", border: "none", cursor: "pointer" }} onClick={() => handleOrderStatus(order.id, "DELIVERED")}>
-                        🚴 Mark Out for Delivery
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -567,14 +648,16 @@ function Dashboard() {
                       </span>
                     </div>
                     <h3>{food.name}</h3>
-                    <p className="dish-desc">{food.description}</p>
-                    <strong className="dish-price">₹{food.price}</strong>
-                  </div>
-
-                  <div className="dish-status-bar">
-                    <span className={food.is_available !== false ? "tag-avail" : "tag-unavail"}>
-                      {food.is_available !== false ? "✓ Available" : "✕ Disabled"}
-                    </span>
+                    <p className="dish-desc">
+                      {food.description || "No description provided."}
+                    </p>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                      <p className="dish-price" style={{ margin: 0 }}>₹{food.price}</p>
+                      <span className={food.is_available !== false ? "tag-avail" : "tag-unavail"}>
+                        {food.is_available !== false ? "✓ Available" : "✕ Disabled"}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="dish-card-actions">
@@ -606,7 +689,98 @@ function Dashboard() {
         </div>
       )}
 
-      {/* TAB 3: COMPLAINTS */}
+      {/* TAB 3: ACCEPTED ORDERS */}
+      {activeTab === "accepted_orders" && (
+        <div className="admin-section">
+          {inProgressOrders.length > 0 ? (
+            <div className="admin-orders-box">
+              <h2 className="admin-section-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                <span>👨‍🍳 Kitchen Preparing ({inProgressOrders.length})</span>
+                <input 
+                  type="text" 
+                  placeholder="Search accepted order ID, name, phone..." 
+                  value={acceptedSearchTerm}
+                  onChange={(e) => setAcceptedSearchTerm(e.target.value)}
+                  style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px", minWidth: "250px" }}
+                />
+              </h2>
+              
+              <div style={{ backgroundColor: "#fef3c7", padding: "15px", borderRadius: "8px", marginBottom: "20px", border: "1px solid #fde68a" }}>
+                <h3 style={{ color: "#b45309", fontSize: "16px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  📋 Kitchen Summary (To Cook Now)
+                </h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "10px" }}>
+                  {Object.entries(
+                    inProgressOrders.flatMap(o => o.items || []).reduce((acc, item) => {
+                      acc[item.name] = (acc[item.name] || 0) + item.quantity;
+                      return acc;
+                    }, {})
+                  ).map(([name, qty]) => (
+                    <div key={name} style={{ display: "flex", alignItems: "center", gap: "10px", fontWeight: "600", fontSize: "14px", color: "#0f172a" }}>
+                      <span style={{ backgroundColor: "#d97706", color: "white", padding: "2px 8px", borderRadius: "6px", fontSize: "12px" }}>{qty}x</span>
+                      {name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {inProgressOrders.map((order) => (
+                <div className="admin-order-card" key={order.id} style={{ borderLeft: "4px solid #f59e0b" }}>
+                  <div className="admin-order-top">
+                    <div>
+                      <h3>Order #{order.id.slice(-6).toUpperCase()}</h3>
+                      <span className="status-badge preparing-badge">{order.status}</span>
+                    </div>
+                  </div>
+
+                  <div className="customer-info-box" style={{ backgroundColor: "#f8fafc", padding: "12px", borderRadius: "8px", margin: "12px 0" }}>
+                    <p style={{ fontSize: "13px" }}><strong>Customer:</strong> {order.customer_name}</p>
+                    <p style={{ fontSize: "13px" }}>
+                      <strong>Phone:</strong> <a href={`tel:+91${order.customer_phone}`} className="phone-link">📞 {order.customer_phone}</a>
+                    </p>
+                  </div>
+
+                  <div className="order-items-summary" style={{ border: "1px dashed #cbd5e1", padding: "12px", borderRadius: "8px", backgroundColor: "#fffbeb" }}>
+                    <p style={{ color: "#92400e", fontWeight: "700", marginBottom: "8px" }}>Items to Prepare:</p>
+                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {order.items?.map((it, idx) => (
+                        <li key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", fontWeight: "600" }}>
+                          {it.name}
+                          <span style={{ backgroundColor: "#d97706", color: "white", padding: "2px 8px", borderRadius: "12px", fontSize: "12px" }}>x{it.quantity}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="admin-action-buttons" style={{ marginTop: "15px" }}>
+                    <button
+                      className="btn-accept"
+                      style={{ backgroundColor: "#10b981" }}
+                      onClick={() => handleOrderStatus(order.id, "READY")}
+                    >
+                      🍽️ Mark Ready
+                    </button>
+                    <button
+                      className="btn-accept"
+                      style={{ backgroundColor: "#3b82f6" }}
+                      onClick={() => handleOrderStatus(order.id, "DELIVERED")}
+                    >
+                      ✅ Delivered
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="admin-empty-state">
+              <span>✨</span>
+              <p>No orders currently in preparation.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 3.5: COMPLAINTS */}
       {activeTab === "complaints" && (
         <div className="admin-section">
           <h2 className="admin-section-title">💬 Customer Complaints & Support Queue</h2>
@@ -648,7 +822,7 @@ function Dashboard() {
           )}
         </div>
       )}
-                                    
+
       {/* TAB 4: USERS / CUSTOMERS */}
       {activeTab === "users" && (
         <div className="admin-section">
@@ -980,7 +1154,8 @@ function Dashboard() {
         </div>
       )}
 
-    </main>
+      </main>
+    </div>
   );
 }
 

@@ -159,6 +159,11 @@ api.getFoodItems = async () => {
   return res.data;
 };
 
+api.getAdminFoodItems = async () => {
+  const res = await api.get("/admin/food-items");
+  return res.data;
+};
+
 api.likeFoodItem = async (id) => {
   const res = await api.post(`/food-items/${id}/like`);
   return res.data;
@@ -195,7 +200,7 @@ api.getCustomerOrders = async () => {
 };
 
 api.getAdminOrders = async () => {
-  const res = await api.get("/admin/orders");
+  const res = await api.get(`/admin/orders?t=${new Date().getTime()}`);
   return res.data;
 };
 

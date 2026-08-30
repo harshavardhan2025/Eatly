@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 
@@ -7,6 +7,7 @@ const SUPPORT_PHONE = "9866963013";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   const [phone, setPhone] = useState("");
@@ -41,7 +42,14 @@ function Login() {
 
     try {
       const loggedInUser = await login(phone, password);
-      if (loggedInUser && (loggedInUser.role === "admin" || phone === "9999999999")) {
+      const isUserAdmin = loggedInUser && (loggedInUser.role === "admin" || phone === "9999999999");
+      
+      // If on the admin login page, restrict to admin users only
+      if (location.pathname === "/admin/login" && !isUserAdmin) {
+        throw new Error("Access Denied: You do not have administrator privileges.");
+      }
+
+      if (isUserAdmin) {
         navigate("/admin");
       } else {
         navigate("/");

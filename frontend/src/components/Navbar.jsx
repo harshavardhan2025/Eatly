@@ -16,7 +16,8 @@ import {
   X, 
   UtensilsCrossed,
   MessageSquare,
-  Users
+  Users,
+  ChefHat
 } from "lucide-react";
 
 function Navbar() {
@@ -44,16 +45,25 @@ function Navbar() {
 
   return (
     <>
-      <nav className="navbar">
+      <nav className={`navbar ${isAdminMode ? 'admin-navbar' : ''}`}>
         <div className="navbar-container">
-          <Link to={isAdminMode ? "/admin" : "/"} className="logo" onClick={() => setMobileOpen(false)}>
-            <UtensilsCrossed className="logo-icon" size={24} color="#f59e0b" />
-            <span className="logo-text">
-              Eatly
-            </span>
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Link to={isAdminMode ? "/admin" : "/"} className="logo" onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '15px', textDecoration: 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <UtensilsCrossed className="logo-icon" size={24} color="#f59e0b" />
+                <span className="logo-text" style={{ color: '#ffffff' }}>Eatly</span>
+              </div>
+              
+              {isAdminMode && (
+                <div style={{ display: 'flex', flexDirection: 'column', borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: '15px' }}>
+                  <span style={{ fontSize: '11px', color: '#f59e0b', fontWeight: '800', letterSpacing: '1px', lineHeight: '1' }}>RESTAURANT ADMIN</span>
+                  <span style={{ fontSize: '18px', color: '#ffffff', fontWeight: '800', lineHeight: '1.2' }}>Dashboard</span>
+                </div>
+              )}
+            </Link>
+          </div>
 
-          {location.pathname === "/menu" && (
+          {location.pathname === "/menu" && !isAdminMode && (
             <div className="mobile-header-search">
               <input
                 type="text"
@@ -70,16 +80,10 @@ function Navbar() {
             <div className={`nav-links ${mobileOpen ? "mobile-active" : ""}`}>
               {isAdminMode ? (
                 <>
-                  <Link to="/admin" className={`nav-item ${isActive("/admin") ? "active" : ""}`} onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Shield size={18} /> Admin Dashboard
-                  </Link>
                   <div className="user-menu">
                     <span className="user-badge" style={{ fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Shield size={16} /> Admin
+                      <User size={16} /> {user?.name || 'Admin'}
                     </span>
-                    <button onClick={handleLogout} className="nav-logout-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <LogOut size={16} /> Logout
-                    </button>
                   </div>
                 </>
               ) : (
@@ -98,12 +102,6 @@ function Navbar() {
                     </Link>
                   )}
 
-                  {isAdmin && (
-                    <Link to="/admin" className={`nav-item admin-link ${isActive("/admin") ? "active" : ""}`} onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Shield size={18} /> Admin
-                    </Link>
-                  )}
-
                   <Link to="/cart" className="cart-nav-btn" onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <ShoppingCart size={18} />
                     <span>Cart</span>
@@ -112,38 +110,69 @@ function Navbar() {
                     )}
                   </Link>
 
-                  {user ? (
-                    <div className="user-menu">
-                      <span className="user-badge" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: '1.2' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><User size={14} /> {user.name}</span>
-                        <span style={{ fontSize: '11px', opacity: 0.8, marginTop: '2px' }}>{user.phone}</span>
-                      </span>
-                      <button onClick={handleLogout} className="nav-logout-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {/* MOBILE ONLY AUTH BUTTONS */}
+                  <div className="mobile-only-auth" style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    {user ? (
+                      <button onClick={handleLogout} className="nav-logout-btn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%' }}>
                         <LogOut size={16} /> Logout
                       </button>
-                    </div>
-                  ) : (
-                    <div className="auth-btns">
-                      <Link to="/login" className="login-link" onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <LogIn size={18} /> Login
-                      </Link>
-                      <Link to="/register" className="register-btn" onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <UserPlus size={18} /> Register
-                      </Link>
-                    </div>
-                  )}
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <Link to="/login" className="login-link" onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <LogIn size={18} /> Login
+                        </Link>
+                        <Link to="/register" className="register-btn" onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <UserPlus size={18} /> Register
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
             </div>
 
-            {/* Mobile Hamburger Toggle Button */}
-            <button
-              className="mobile-hamburger"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle Navigation Menu"
-            >
-              {mobileOpen ? <X size={24} /> : <MenuIcon size={24} />}
-            </button>
+            {isAdminMode ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <button onClick={handleLogout} className="nav-logout-btn desktop-auth" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fef3c7', color: '#d97706', border: 'none', padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+                  <LogOut size={16} /> Logout
+                </button>
+                <button
+                  className="admin-navbar-hamburger"
+                  style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer' }}
+                  onClick={() => window.dispatchEvent(new CustomEvent('toggle-admin-sidebar'))}
+                  aria-label="Toggle Admin Sidebar"
+                >
+                  <MenuIcon size={24} />
+                </button>
+              </div>
+            ) : (
+              <>
+                {user ? (
+                  <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <span className="user-badge" style={{ display: 'none' }}></span>
+                    <button onClick={handleLogout} className="nav-logout-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '6px 12px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+                      <LogOut size={16} /> Logout
+                    </button>
+                  </div>
+                ) : (
+                  <div className="auth-btns desktop-auth">
+                    <Link to="/login" className="login-link" onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <LogIn size={18} /> Login
+                    </Link>
+                    <Link to="/register" className="register-btn" onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <UserPlus size={18} /> Register
+                    </Link>
+                  </div>
+                )}
+                <button
+                  className="mobile-hamburger"
+                  onClick={() => setMobileOpen(!mobileOpen)}
+                  aria-label="Toggle Navigation Menu"
+                >
+                  {mobileOpen ? <X size={24} /> : <MenuIcon size={24} />}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -151,19 +180,19 @@ function Navbar() {
       {/* Mobile Fixed Bottom App Bar */}
       {isAdminMode ? (
         <div className="mobile-bottom-nav admin-mobile-bottom-nav">
-          <Link to="/admin?tab=orders" className={`mobile-nav-item ${isActive("/admin") && (!location.search || location.search.includes("tab=orders")) ? "active" : ""}`}>
+          <Link to="/admin?tab=active_orders" className={`mobile-nav-item ${isActive("/admin") && (!location.search || location.search.includes("tab=active_orders")) ? "active" : ""}`}>
             <Package className="mobile-nav-icon" size={20} />
             <span className="mobile-nav-label">Orders</span>
+          </Link>
+
+          <Link to="/admin?tab=accepted_orders" className={`mobile-nav-item ${location.search.includes("tab=accepted_orders") ? "active" : ""}`}>
+            <ChefHat className="mobile-nav-icon" size={20} />
+            <span className="mobile-nav-label">Accepted</span>
           </Link>
 
           <Link to="/admin?tab=menu" className={`mobile-nav-item ${location.search.includes("tab=menu") ? "active" : ""}`}>
             <BookOpen className="mobile-nav-icon" size={20} />
             <span className="mobile-nav-label">Menu</span>
-          </Link>
-
-          <Link to="/admin?tab=complaints" className={`mobile-nav-item ${location.search.includes("tab=complaints") ? "active" : ""}`}>
-            <MessageSquare className="mobile-nav-icon" size={20} />
-            <span className="mobile-nav-label">Complaints</span>
           </Link>
 
           <Link to="/admin?tab=users" className={`mobile-nav-item ${location.search.includes("tab=users") ? "active" : ""}`}>
